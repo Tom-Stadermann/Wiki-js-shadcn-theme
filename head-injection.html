@@ -1,0 +1,16 @@
+<!-- ==========================================================================
+     OPTIONAL — Administration → Theme → Code Injection → "Head HTML Injection"
+
+     theme.css works on its own. This only loads Inter, the typeface shadcn/ui
+     uses. Without it the font stack falls back to the native UI font
+     (SF Pro / Segoe UI), which looks very close.
+
+     If you would rather not touch head injection at all, put this at the very
+     top of theme.css instead — it costs one render-blocking request:
+
+       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+     ========================================================================== -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
