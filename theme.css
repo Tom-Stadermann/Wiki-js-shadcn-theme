@@ -1,0 +1,597 @@
+/* ==========================================================================
+   wikijs-shadcn — a shadcn/ui-inspired theme for Wiki.js 2
+   https://github.com/<your-user>/wikijs-shadcn
+
+   Install: Administration → Theme → Code Injection → "CSS Override".
+   Paste this whole file, hit APPLY, hard-reload (Cmd/Ctrl + Shift + R).
+
+   --------------------------------------------------------------------------
+   WHY EVERY CHROME RULE LOOKS OVER-QUALIFIED
+
+   Wiki.js loads its Vue/Vuetify stylesheets at runtime, i.e. AFTER the CSS you
+   inject here. Vuetify writes its color classes as
+
+       .v-application .black { background-color: #000 !important }
+
+   so `!important` meets `!important` and specificity decides — and on a tie the
+   later stylesheet wins, which is always Vuetify. A plain `.nav-header { … }`
+   therefore does nothing.
+
+   Every rule that competes with a Vuetify color class is lifted to (0,3,1) via
+   an attribute selector, e.g. `.v-application header.v-app-bar[class]`. That
+   outranks any color class without having to know which one Wiki.js applies.
+   Keep this in mind before "simplifying" a selector.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1 · Design tokens — this is the only block you normally need to touch
+   -------------------------------------------------------------------------- */
+:root {
+  /* Surfaces & text (shadcn "zinc") */
+  --sh-bg:            #fafafa;   /* page background          */
+  --sh-surface:       #ffffff;   /* cards, header, sidebar   */
+  --sh-fg:            #09090b;   /* primary text             */
+  --sh-fg-soft:       #3f3f46;   /* body copy, nav labels    */
+  --sh-muted:         #f4f4f5;   /* fills, hover states      */
+  --sh-muted-fg:      #71717a;   /* secondary text, icons    */
+  --sh-border:        #e4e4e7;
+  --sh-border-strong: #d4d4d8;
+
+  /* Accent — buttons, links, active nav item, FAB, text selection.
+     Default is shadcn's near-black. Drop your brand color in here:
+       --sh-accent:       #961a1a;
+       --sh-accent-hover: #7d1515;
+       --sh-accent-soft:  #fdf3f3;   (a ~4% tint of the accent)           */
+  --sh-accent:        #18181b;
+  --sh-accent-hover:  #27272a;
+  --sh-accent-soft:   #f4f4f5;
+
+  --sh-radius-sm:     6px;
+  --sh-radius:        10px;
+  --sh-radius-lg:     14px;
+
+  --sh-shadow-sm:     0 1px 2px 0 rgba(9, 9, 11, .05);
+  --sh-shadow:        0 1px 3px 0 rgba(9, 9, 11, .08), 0 1px 2px -1px rgba(9, 9, 11, .05);
+
+  /* Inter is optional — see head-injection.html. Without it the stack falls
+     back to the native UI font, which is visually very close.              */
+  --sh-font:          'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                      'Helvetica Neue', Arial, sans-serif;
+  --sh-mono:          ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+
+/* --------------------------------------------------------------------------
+   2 · Base
+   -------------------------------------------------------------------------- */
+.v-application,
+.v-application .text-h1, .v-application .text-h2, .v-application .text-h3,
+.v-application .text-h4, .v-application .text-h5, .v-application .text-h6,
+.v-application .headline, .v-application .title, .v-application .subtitle-1,
+.v-application .subtitle-2, .v-application .body-1, .v-application .body-2,
+.v-application .caption, .v-application .overline {
+  font-family: var(--sh-font) !important;
+  letter-spacing: normal !important;
+}
+
+.v-application {
+  background: var(--sh-bg) !important;
+  color: var(--sh-fg) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.v-application .v-main,
+.v-application .v-main__wrap {
+  background: var(--sh-bg) !important;
+}
+
+/* Scrollbars */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--sh-border-strong);
+  border-radius: 999px;
+  border: 3px solid var(--sh-bg);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--sh-muted-fg); }
+.__bar-is-vertical { background: rgba(0, 0, 0, .18) !important; }
+
+
+/* --------------------------------------------------------------------------
+   3 · Header / top bar
+   Do NOT change its height here — Vuetify derives the .v-main offset from the
+   original value, and the search field will spill out of the bar.
+   -------------------------------------------------------------------------- */
+.v-application header.v-app-bar[class],
+.v-application header.v-toolbar[class],
+.v-application .nav-header[class] {
+  background: var(--sh-surface) !important;
+  background-color: var(--sh-surface) !important;
+  background-image: none !important;
+  border-bottom: 1px solid var(--sh-border) !important;
+  box-shadow: none !important;
+}
+
+/* Recolor header contents (Wiki.js renders them with .theme--dark) */
+.v-application header.v-app-bar .v-toolbar__title,
+.v-application header.v-app-bar .v-btn,
+.v-application header.v-app-bar .v-icon,
+.v-application header.v-app-bar .v-btn .v-icon,
+.v-application .nav-header .v-toolbar__title,
+.v-application .nav-header .v-btn,
+.v-application .nav-header .v-icon {
+  color: var(--sh-fg) !important;
+}
+
+.v-application header.v-app-bar .v-btn[class],
+.v-application .nav-header .v-btn[class] {
+  background-color: transparent !important;
+  border-radius: var(--sh-radius-sm) !important;
+  box-shadow: none !important;
+}
+.v-application header.v-app-bar .v-btn[class]:hover,
+.v-application .nav-header .v-btn[class]:hover {
+  background-color: var(--sh-muted) !important;
+}
+.v-application header.v-app-bar .v-btn::before { opacity: 0 !important; }
+
+.v-application header.v-app-bar .v-toolbar__title,
+.v-application .nav-header .site-title {
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  letter-spacing: -.01em !important;
+}
+
+/* Search field */
+.v-application header.v-app-bar .v-input__slot,
+.v-application .nav-header .v-input__slot,
+.v-application .nav-header .search-input {
+  background-color: var(--sh-muted) !important;
+  border: 1px solid var(--sh-border) !important;
+  border-radius: var(--sh-radius) !important;
+  box-shadow: none !important;
+}
+.v-application header.v-app-bar input,
+.v-application .nav-header input { color: var(--sh-fg) !important; }
+.v-application header.v-app-bar input::placeholder,
+.v-application .nav-header input::placeholder { color: var(--sh-muted-fg) !important; }
+
+
+/* --------------------------------------------------------------------------
+   4 · Sidebar / navigation drawer
+   -------------------------------------------------------------------------- */
+.v-application nav.v-navigation-drawer[class],
+.v-application aside.v-navigation-drawer[class],
+.v-application .nav-sidebar[class] {
+  background: var(--sh-surface) !important;
+  background-color: var(--sh-surface) !important;
+  background-image: none !important;
+  border-right: 1px solid var(--sh-border) !important;
+  box-shadow: none !important;
+}
+
+.v-application .v-navigation-drawer .v-list { padding: 8px !important; }
+
+.v-application .v-navigation-drawer .v-list-item {
+  border-radius: var(--sh-radius-sm) !important;
+  min-height: 36px !important;
+  margin-bottom: 2px !important;
+  padding: 0 10px !important;
+  transition: background-color .12s ease, color .12s ease;
+}
+.v-application .v-navigation-drawer .v-list-item::before { opacity: 0 !important; }
+
+.v-application .v-navigation-drawer .v-list-item__title,
+.v-application .v-navigation-drawer .v-list-item__subtitle {
+  color: var(--sh-fg-soft) !important;
+  font-size: .875rem !important;
+  font-weight: 500 !important;
+  letter-spacing: normal !important;
+}
+.v-application .v-navigation-drawer .v-list-item .v-icon {
+  color: var(--sh-muted-fg) !important;
+  font-size: 19px !important;
+}
+.v-application .v-navigation-drawer .v-list-item__icon {
+  margin-right: 10px !important;
+  min-width: 24px !important;
+}
+
+.v-application .v-navigation-drawer .v-list-item[class]:hover {
+  background-color: var(--sh-muted) !important;
+}
+.v-application .v-navigation-drawer .v-list-item:hover .v-list-item__title {
+  color: var(--sh-fg) !important;
+}
+
+.v-application .v-navigation-drawer .v-list-item--active[class],
+.v-application .v-navigation-drawer .v-list-item.is-active[class] {
+  background-color: var(--sh-accent-soft) !important;
+}
+.v-application .v-navigation-drawer .v-list-item--active .v-list-item__title,
+.v-application .v-navigation-drawer .v-list-item--active .v-icon {
+  color: var(--sh-accent) !important;
+  font-weight: 600 !important;
+}
+
+/* Section labels */
+.v-application .v-navigation-drawer .v-subheader,
+.v-application .v-navigation-drawer .nav-header-label {
+  color: var(--sh-muted-fg) !important;
+  font-size: .6875rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .06em !important;
+  height: 34px !important;
+  padding: 0 10px !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   5 · Breadcrumbs
+   -------------------------------------------------------------------------- */
+.v-application .v-breadcrumbs { padding: 10px 0 !important; }
+.v-application .v-breadcrumbs li,
+.v-application .v-breadcrumbs a,
+.v-application .v-breadcrumbs .v-icon {
+  color: var(--sh-muted-fg) !important;
+  font-size: .8125rem !important;
+}
+.v-application .v-breadcrumbs a:hover { color: var(--sh-fg) !important; }
+.v-application .v-breadcrumbs li:last-child a { color: var(--sh-fg) !important; font-weight: 500 !important; }
+.v-application .v-breadcrumbs__divider { padding: 0 6px !important; }
+
+
+/* --------------------------------------------------------------------------
+   6 · Cards (table of contents, tags, last-edited panel)
+   -------------------------------------------------------------------------- */
+.v-application .v-card[class] {
+  border-radius: var(--sh-radius-lg) !important;
+  border: 1px solid var(--sh-border) !important;
+  box-shadow: var(--sh-shadow-sm) !important;
+  background-color: var(--sh-surface) !important;
+  background-image: none !important;
+}
+
+.v-application .v-card__title {
+  font-size: .6875rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .06em !important;
+  color: var(--sh-muted-fg) !important;
+  padding: 14px 16px !important;
+}
+.v-application .v-card__subtitle { color: var(--sh-muted-fg) !important; }
+.v-application .v-card__text { color: var(--sh-fg-soft) !important; font-size: .875rem !important; }
+
+.v-application .v-card .v-list-item {
+  border-radius: var(--sh-radius-sm) !important;
+  min-height: 34px !important;
+}
+.v-application .v-card .v-list-item[class]:hover { background-color: var(--sh-muted) !important; }
+.v-application .v-card .v-list-item__title { font-size: .8125rem !important; color: var(--sh-fg-soft) !important; }
+
+
+/* --------------------------------------------------------------------------
+   7 · Buttons
+   -------------------------------------------------------------------------- */
+.v-application .v-btn {
+  border-radius: var(--sh-radius-sm) !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-weight: 500 !important;
+  font-size: .875rem !important;
+  box-shadow: none !important;
+}
+.v-application .v-btn--fab { border-radius: 999px !important; }
+
+.v-application .v-btn.primary[class],
+.v-application .v-card .primary:not(nav):not(header),
+.v-application .v-main .primary:not(nav):not(header) {
+  background-color: var(--sh-accent) !important;
+  border-color: var(--sh-accent) !important;
+  color: #fff !important;
+}
+.v-application .v-btn.primary[class]:hover { background-color: var(--sh-accent-hover) !important; }
+.v-application .primary--text { color: var(--sh-accent) !important; caret-color: var(--sh-accent) !important; }
+
+.v-application .v-btn.v-btn--outlined[class] {
+  background-color: var(--sh-surface) !important;
+  border: 1px solid var(--sh-border) !important;
+  color: var(--sh-fg) !important;
+}
+.v-application .v-btn.v-btn--outlined[class]:hover { background-color: var(--sh-muted) !important; }
+
+
+/* --------------------------------------------------------------------------
+   8 · Chips / badges (tags)
+   -------------------------------------------------------------------------- */
+.v-application .v-chip[class] {
+  border-radius: var(--sh-radius-sm) !important;
+  height: 24px !important;
+  font-size: .75rem !important;
+  font-weight: 500 !important;
+  letter-spacing: normal !important;
+  background-color: var(--sh-muted) !important;
+  border: 1px solid var(--sh-border) !important;
+  box-shadow: none !important;
+}
+.v-application .v-chip[class],
+.v-application .v-chip[class] * { color: var(--sh-fg-soft) !important; }
+.v-application .v-chip[class]:hover { background-color: #ebebed !important; }
+.v-application .v-chip .v-icon { font-size: 14px !important; color: var(--sh-muted-fg) !important; }
+
+
+/* --------------------------------------------------------------------------
+   9 · Page content
+   Wiki.js requires content styles to be scoped to .contents — otherwise the
+   editor layout breaks. Keep that scope on everything in this section.
+   -------------------------------------------------------------------------- */
+.v-application .contents {
+  font-family: var(--sh-font) !important;
+  font-size: .9375rem;
+  line-height: 1.7;
+  color: #27272a;
+}
+
+.v-application .contents h1,
+.v-application .contents h2,
+.v-application .contents h3,
+.v-application .contents h4,
+.v-application .contents h5,
+.v-application .contents h6 {
+  color: var(--sh-fg) !important;
+  font-weight: 600 !important;
+  letter-spacing: -.02em !important;
+  scroll-margin-top: 80px;
+}
+.v-application .contents h1 {
+  font-size: 1.875rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -.028em !important;
+  padding-bottom: .5rem !important;
+  border-bottom: 1px solid var(--sh-border) !important;
+  margin-bottom: 1.25rem !important;
+}
+/* Wiki.js draws a gradient rule under h1 — replaced by the border above */
+.v-application .contents h1:after { display: none !important; background: none !important; }
+.v-application .contents h2 {
+  font-size: 1.375rem !important;
+  margin-top: 2.25rem !important;
+  padding-bottom: .4rem !important;
+  border-bottom: 1px solid var(--sh-border) !important;
+}
+.v-application .contents h3 { font-size: 1.125rem !important; margin-top: 1.75rem !important; }
+.v-application .contents h4 { font-size: 1rem !important; margin-top: 1.5rem !important; }
+
+.v-application .contents p { margin-bottom: 1rem; }
+.v-application .contents strong,
+.v-application .contents b { font-weight: 600; color: var(--sh-fg); }
+
+/* shadcn treats links as underlined foreground, which stays legible with any
+   accent — including the near-black default. */
+.v-application .contents a {
+  color: var(--sh-accent) !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+}
+.v-application .contents a:hover { text-decoration-thickness: 2px; }
+
+.v-application .contents ul,
+.v-application .contents ol { padding-left: 1.4rem; margin-bottom: 1rem; }
+.v-application .contents li { margin-bottom: .35rem; }
+.v-application .contents ul > li::marker { color: var(--sh-border-strong); }
+
+.v-application .contents hr { border: 0; border-top: 1px solid var(--sh-border); margin: 2rem 0; }
+
+/* Code */
+.v-application .contents code {
+  font-family: var(--sh-mono) !important;
+  font-size: .85em !important;
+  background-color: var(--sh-muted) !important;
+  border: 1px solid var(--sh-border) !important;
+  border-radius: var(--sh-radius-sm) !important;
+  padding: .12em .38em !important;
+  color: #be123c !important;
+}
+.v-application .contents pre {
+  background-color: #09090b !important;
+  border: 1px solid #18181b !important;
+  border-radius: var(--sh-radius-lg) !important;
+  padding: 1rem 1.15rem !important;
+  overflow-x: auto;
+  box-shadow: var(--sh-shadow-sm);
+}
+.v-application .contents pre code {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  color: #e4e4e7 !important;
+  font-size: .8125rem !important;
+  line-height: 1.6;
+}
+
+/* Blockquotes & callouts, restyled as shadcn alerts */
+.v-application .contents blockquote[class],
+.v-application .contents blockquote {
+  border: 1px solid var(--sh-border) !important;
+  border-left: 3px solid var(--sh-border-strong) !important;
+  background-color: var(--sh-muted) !important;
+  border-radius: var(--sh-radius) !important;
+  padding: .9rem 1.1rem !important;
+  margin: 1.25rem 0 !important;
+  color: var(--sh-fg-soft) !important;
+}
+.v-application .contents blockquote p { color: var(--sh-fg-soft) !important; }
+.v-application .contents blockquote p:last-child { margin-bottom: 0; }
+.v-application .contents blockquote a { font-weight: 600; }
+
+/* Wiki.js draws a speech-bubble arrow with CSS border triangles in
+   ::before / ::after. Zeroing the background is not enough — remove both. */
+.v-application .contents blockquote::before,
+.v-application .contents blockquote::after {
+  content: none !important;
+  display: none !important;
+  border: 0 !important;
+}
+
+.v-application .contents blockquote.is-info[class] {
+  background-color: #f5f8ff !important; border-color: #dbe6fe !important; border-left-color: #2563eb !important;
+}
+.v-application .contents blockquote.is-success[class] {
+  background-color: #f3fbf6 !important; border-color: #d2f0de !important; border-left-color: #16a34a !important;
+}
+.v-application .contents blockquote.is-warning[class] {
+  background-color: #fffbf2 !important; border-color: #fdeccb !important; border-left-color: #d97706 !important;
+}
+.v-application .contents blockquote.is-danger[class] {
+  background-color: #fdf4f4 !important; border-color: #f7dede !important; border-left-color: #dc2626 !important;
+}
+.v-application .contents blockquote.is-info strong    { color: #1d4ed8 !important; }
+.v-application .contents blockquote.is-success strong { color: #15803d !important; }
+.v-application .contents blockquote.is-warning strong { color: #b45309 !important; }
+.v-application .contents blockquote.is-danger strong  { color: #b91c1c !important; }
+
+/* Tables */
+.v-application .contents table {
+  width: 100%;
+  border: 1px solid var(--sh-border) !important;
+  border-radius: var(--sh-radius-lg) !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  overflow: hidden;
+  margin: 1.25rem 0;
+  font-size: .875rem;
+  box-shadow: var(--sh-shadow-sm);
+}
+.v-application .contents table th {
+  background-color: var(--sh-muted) !important;
+  color: var(--sh-muted-fg) !important;
+  font-weight: 600 !important;
+  font-size: .8125rem !important;
+  text-transform: none !important;
+  text-align: left;
+}
+.v-application .contents table th,
+.v-application .contents table td {
+  border: 0 !important;
+  border-bottom: 1px solid var(--sh-border) !important;
+  padding: .625rem .875rem !important;
+}
+.v-application .contents table tr:last-child td { border-bottom: 0 !important; }
+.v-application .contents table tbody tr:hover { background-color: #fcfcfd; }
+
+/* Images */
+.v-application .contents img {
+  max-width: 100%;
+  border-radius: var(--sh-radius-lg);
+  border: 1px solid var(--sh-border);
+  box-shadow: var(--sh-shadow);
+}
+
+/* Keyboard keys */
+.v-application .contents kbd {
+  font-family: var(--sh-mono);
+  font-size: .75rem;
+  background-color: var(--sh-surface);
+  border: 1px solid var(--sh-border);
+  border-bottom-width: 2px;
+  border-radius: var(--sh-radius-sm);
+  padding: .1rem .35rem;
+  color: var(--sh-fg);
+}
+
+
+/* --------------------------------------------------------------------------
+   10 · Comments
+   -------------------------------------------------------------------------- */
+.v-application .comments-header[class] {
+  background-color: var(--sh-surface) !important;
+  color: var(--sh-fg) !important;
+  border-bottom: 1px solid var(--sh-border) !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   11 · Form fields
+   -------------------------------------------------------------------------- */
+.v-application .v-text-field--outlined fieldset {
+  border-color: var(--sh-border) !important;
+  border-radius: var(--sh-radius-sm) !important;
+}
+.v-application .v-text-field--outlined.v-input--is-focused fieldset {
+  border-color: var(--sh-border-strong) !important;
+  border-width: 1px !important;
+}
+.v-application .v-label { color: var(--sh-muted-fg) !important; }
+
+
+/* --------------------------------------------------------------------------
+   12 · Final pass
+   These rules depend on source order — keep them last.
+   -------------------------------------------------------------------------- */
+
+/* 12.1 Strip every remaining Vuetify color surface inside the sidebar,
+   including the colored block behind the home / browse buttons. Buttons and
+   the active item are excluded and styled explicitly below. */
+.v-application .v-navigation-drawer *:not(.v-btn):not(.v-list-item--active) {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.v-application .v-navigation-drawer [class*="primary"],
+.v-application .v-navigation-drawer [class*="blue"],
+.v-application .v-navigation-drawer [class*="indigo"],
+.v-application .v-navigation-drawer [class*="darken"],
+.v-application .v-navigation-drawer [class*="lighten"] {
+  border-color: transparent !important;
+}
+
+/* 12.2 Put the borders we actually want back — must follow 12.1 */
+.v-application .v-navigation-drawer .v-divider[class] { border-color: var(--sh-border) !important; }
+.v-application .v-navigation-drawer .v-btn[class] {
+  border: 1px solid var(--sh-border) !important;
+  background-color: var(--sh-surface) !important;
+  color: var(--sh-fg) !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+}
+.v-application .v-navigation-drawer .v-btn[class]:hover { background-color: var(--sh-muted) !important; }
+.v-application .v-navigation-drawer .v-btn .v-icon { color: var(--sh-fg) !important; }
+.v-application .v-navigation-drawer .v-toolbar[class] {
+  border-bottom: 1px solid var(--sh-border) !important;
+}
+
+/* 12.3 Wiki.js tints some card headings (e.g. the table of contents) blue */
+.v-application .v-card .blue--text,
+.v-application .v-card .light-blue--text,
+.v-application .v-card .indigo--text,
+.v-application .v-card .teal--text {
+  color: var(--sh-muted-fg) !important;
+}
+
+/* 12.4 Content as a white panel on the grey page background.
+   Delete this block if you prefer content to sit flush on the background. */
+.v-application .contents {
+  background-color: var(--sh-surface);
+  border: 1px solid var(--sh-border);
+  border-radius: var(--sh-radius-lg);
+  box-shadow: var(--sh-shadow-sm);
+  padding: 28px 32px;
+}
+.v-application .contents > :first-child { margin-top: 0 !important; }
+.v-application .contents > :last-child  { margin-bottom: 0 !important; }
+
+/* 12.5 Floating action button (back to top) */
+.v-application .v-btn--fab[class] {
+  background-color: var(--sh-accent) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(9, 9, 11, .18) !important;
+}
+.v-application .v-btn--fab[class]:hover { background-color: var(--sh-accent-hover) !important; }
+
+/* 12.6 Text selection */
+.v-application ::selection { background: rgba(9, 9, 11, .12); }
