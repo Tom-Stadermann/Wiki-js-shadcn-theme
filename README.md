@@ -13,7 +13,7 @@ White surfaces on a light grey page, 1px borders instead of shadows, rounded car
 
 </details>
 
-Both shots are rendered from [`demo/index.html`](demo/index.html), so they always show what the current `theme.css` actually produces.
+The content shown is a sample wiki, not a real one.
 
 ## Install
 
@@ -68,26 +68,11 @@ Three other gotchas baked into the file:
 - **Callout arrows are border triangles** in `::before` / `::after`. Clearing their background leaves the triangle; you need `content: none` and `border: 0`.
 - **Content styles must stay scoped to `.contents`**, as Wiki.js warns in the admin UI, or the editor layout breaks.
 
-## Preview without installing
-
-Open [`demo/index.html`](demo/index.html) in a browser. It is a static page that reproduces the Wiki.js DOM — same element structure, same Vuetify classes — and loads the real `theme.css`.
-
-The stylesheet order in that file is deliberate:
-
-```html
-<link rel="stylesheet" href="layout.css">        <!-- structure, stands in for Vuetify's layout -->
-<link rel="stylesheet" href="../theme.css">      <!-- the theme, as shipped -->
-<link rel="stylesheet" href="vuetify-colors.css"><!-- Vuetify's color classes, loaded LAST -->
-```
-
-That last file carries `.v-application .black`, `.v-application .primary` and friends with `!important`, exactly as they arrive in a real install. If the demo renders light instead of black-and-blue, the specificity strategy above is holding.
-
 ## What's in here
 
 ```
 theme.css              the theme — this is the only file you need
 head-injection.html    optional, loads Inter
-demo/                  static preview, also a regression check
 docs/                  screenshots used by this README
 ```
 
